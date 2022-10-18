@@ -12,8 +12,8 @@ pub trait PayableFeatures {
     fn init(&self) {} // function executed when deploying the contract, this one return itself
 
     #[payable("EGLD")] // Needs to be paid 0.05 EGLD to create a new token
-    #[endpoint(issue)] // data -> issue -> create a new token, completely flexible, it can be a NFT/SFT collection, with or without decimal quantity and with or without properties
-    fn issue_fungible(
+    #[endpoint(issueCollection)] // data -> issue -> create a new token, completely flexible, it can be a NFT/SFT collection, with or without decimal quantity and with or without properties
+    fn issue_collection(
         &self,
         _token_display_name: ManagedBuffer,
         token_ticker: ManagedBuffer,
