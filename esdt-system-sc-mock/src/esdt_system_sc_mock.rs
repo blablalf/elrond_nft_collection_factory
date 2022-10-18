@@ -9,11 +9,12 @@ const RAND_CHARS_LEN: usize = 6;
 #[elrond_wasm::contract]
 pub trait PayableFeatures {
     #[init]
-    fn init(&self) {}
+    fn init(&self) {} // function executed when deploying the contract
 
-    #[payable("EGLD")]
-    #[endpoint(issue)]
+    #[payable("EGLD")] // Needs to be paid 0.05 EGLD to create a new token
+    #[endpoint(issue)] // data -> issue -> create a new token with properties like a NFT but... this one is a collection of fungible ones
     fn issue_fungible(
+        // function in charge of the creation of new tokens
         &self,
         _token_display_name: ManagedBuffer,
         token_ticker: ManagedBuffer,
@@ -40,9 +41,10 @@ pub trait PayableFeatures {
         new_token_id
     }
 
-    #[payable("EGLD")]
-    #[endpoint(issueNonFungible)]
+    #[payable("EGLD")] // Needs to be paid 0.05EGLD
+    #[endpoint(issueNonFungible)] // endpoint for NFTs collection creation
     fn issue_non_fungible(
+        // funciton in charge of the creation of new NFTs collection tokens
         &self,
         _token_display_name: ManagedBuffer,
         token_ticker: ManagedBuffer,
@@ -51,9 +53,10 @@ pub trait PayableFeatures {
         self.create_new_token_id(token_ticker)
     }
 
-    #[payable("EGLD")]
-    #[endpoint(issueSemiFungible)]
+    #[payable("EGLD")] // Needs to be paid 0.05EGLD
+    #[endpoint(issueSemiFungible)] // endpoint for semi fungible tokens collection creation
     fn issue_semi_fungible(
+        // funciton in charge of the creation of new semi fungible tokens collection tokens
         &self,
         _token_display_name: ManagedBuffer,
         token_ticker: ManagedBuffer,
@@ -62,8 +65,8 @@ pub trait PayableFeatures {
         self.create_new_token_id(token_ticker)
     }
 
-    #[payable("EGLD")]
-    #[endpoint(registerMetaESDT)]
+    #[payable("EGLD")] // Needs to be paid 0.05EGLD
+    #[endpoint(registerMetaESDT)] // Create an ESDT token, completely fungible and without any property
     fn issue_meta_esdt(
         &self,
         _token_display_name: ManagedBuffer,
@@ -74,8 +77,9 @@ pub trait PayableFeatures {
         self.create_new_token_id(token_ticker)
     }
 
-    #[endpoint(setSpecialRole)]
+    #[endpoint(setSpecialRole)] // endpoint to set new roles (permissions) concerning the token (like the right of creating new tokens into a collection)
     fn set_special_roles(
+        // the function in charge of it
         &self,
         _token_id: TokenIdentifier,
         _address: ManagedAddress,
@@ -83,32 +87,32 @@ pub trait PayableFeatures {
     ) {
     }
 
-    #[payable("EGLD")]
-    #[endpoint(registerAndSetAllRoles)]
+    #[payable("EGLD")] // Needs to be paid 0.05EGLD
+    #[endpoint(registerAndSetAllRoles)] // Not sure to know what this is doing
     fn register_and_set_all_roles(
         &self,
         _token_display_name: ManagedBuffer,
         token_ticker: ManagedBuffer,
-        _token_type_name: ManagedBuffer,
+        _token_type_name: ManagedBuffer, // what is that
         _num_decimals: usize,
     ) -> TokenIdentifier {
         self.create_new_token_id(token_ticker)
     }
 
     fn create_new_token_id(&self, token_ticker: ManagedBuffer) -> TokenIdentifier {
-        let nr_issued_tokens = self.nr_issued_tokens().get();
-        let mut rand_chars = [ZERO_ASCII; RAND_CHARS_LEN];
+        let nr_issued_tokens = self.nr_issued_tokens().get(); // get the map of issued tokens from this contract
+        let mut rand_chars = [ZERO_ASCII; RAND_CHARS_LEN]; // creating an array with correct length for generating random chars, this array is directly fullfilled with 0 ascii chars
         for c in &mut rand_chars {
-            *c += nr_issued_tokens;
+            *c += nr_issued_tokens; // adding every random chars to the ticker in order to add the "unique part" at the end
         }
 
-        self.nr_issued_tokens().update(|nr| *nr += 1);
+        self.nr_issued_tokens().update(|nr| *nr += 1); // Whaaaat ?
 
-        let mut token_id = token_ticker;
-        token_id.append_bytes(&[DASH][..]);
-        token_id.append_bytes(&rand_chars);
+        let mut token_id = token_ticker; // Appending the final
+        token_id.append_bytes(&[DASH][..]); // add -
+        token_id.append_bytes(&rand_chars); // add the rand chars
 
-        token_id.into()
+        token_id.into() // into() is a method from into trait that convert a value from a type to another, here we jus return a "ManagedBuffer<<Self as ContractBase>::Api>" value type to a TokenIdentifier value type
     }
 
     #[storage_mapper("nrIssuedTokens")]
