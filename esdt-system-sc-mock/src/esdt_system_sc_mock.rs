@@ -40,42 +40,6 @@ pub trait PayableFeatures {
         new_token_id
     }
 
-    #[payable("EGLD")] // Needs to be paid 0.05EGLD
-    #[endpoint(issueNonFungible)] // endpoint for NFTs collection creation
-    fn issue_non_fungible(
-        // function in charge of the creation of new NFTs collection tokens
-        &self,
-        _token_display_name: ManagedBuffer,
-        token_ticker: ManagedBuffer,
-        _token_properties: MultiValueEncoded<MultiValue2<ManagedBuffer, bool>>,
-    ) -> TokenIdentifier {
-        self.create_new_token_id(token_ticker)
-    }
-
-    #[payable("EGLD")] // Needs to be paid 0.05EGLD
-    #[endpoint(issueSemiFungible)] // endpoint for semi fungible collection token creation
-    fn issue_semi_fungible(
-        // function in charge of the creation of new semi fungible tokens collection tokens
-        &self,
-        _token_display_name: ManagedBuffer,
-        token_ticker: ManagedBuffer,
-        _token_properties: MultiValueEncoded<MultiValue2<ManagedBuffer, bool>>,
-    ) -> TokenIdentifier {
-        self.create_new_token_id(token_ticker)
-    }
-
-    #[payable("EGLD")] // Needs to be paid 0.05EGLD
-    #[endpoint(registerMetaESDT)] // Issue a SFT collection token with decimals quantity
-    fn issue_meta_esdt(
-        &self,
-        _token_display_name: ManagedBuffer,
-        token_ticker: ManagedBuffer,
-        _num_decimals: usize,
-        _token_properties: MultiValueEncoded<MultiValue2<ManagedBuffer, bool>>,
-    ) -> TokenIdentifier {
-        self.create_new_token_id(token_ticker)
-    }
-
     #[endpoint(setSpecialRole)] // endpoint to set new roles (permissions) concerning the token (like the right of creating new tokens into a collection)
     fn set_special_roles(
         // the function in charge of it
@@ -99,13 +63,13 @@ pub trait PayableFeatures {
     }
 
     fn create_new_token_id(&self, token_ticker: ManagedBuffer) -> TokenIdentifier {
-        let nr_issued_tokens = self.nr_issued_tokens().get(); // get the map of issued tokens from this contract
+        let nr_issued_tokens = self.nr_issued_tokens().get(); // get the map of issued tokens from this contract, then get a stored value of the last contract adress ???
         let mut rand_chars = [ZERO_ASCII; RAND_CHARS_LEN]; // creating an array with correct length for generating random chars, this array is directly fullfilled with 0 ascii chars
         for c in &mut rand_chars {
             *c += nr_issued_tokens; // randomization of the chars
         }
 
-        self.nr_issued_tokens().update(|nr| *nr += 1); // Whaaaat ?
+        self.nr_issued_tokens().update(|nr| *nr += 1); // Not sure, maybe we increment 
 
         let mut token_id = token_ticker; // Appending the final
         token_id.append_bytes(&[DASH][..]); // add '-'
